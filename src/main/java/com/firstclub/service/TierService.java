@@ -12,46 +12,37 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TierService {
 
-    private final MembershipTierRepository tierRepository;
-
-    // Existing APIs used by MembershipController
+    private final MembershipTierRepository membershipTierRepository;
 
     public List<MembershipTier> getAllTiers() {
-        return tierRepository.findAll();
+        return membershipTierRepository.findAll();
     }
 
-    public MembershipTier createTier(MembershipTier tier) {
-        return tierRepository.save(tier);
-    }
+    public MembershipTier createTier(
+            MembershipTier tier) {
 
-    // Auto tier evaluation logic
+        return membershipTierRepository.save(tier);
+    }
 
     public MembershipTier evaluateTier(User user) {
 
-        if (
-                user.getTotalOrders() >= 50
-                        || user.getMonthlyOrderValue() >= 10000
-                        || "VIP".equalsIgnoreCase(user.getCohort())
-        ) {
+        List<MembershipTier> tiers =
+                membershipTierRepository.findAll();
 
-            return tierRepository.findById(3L)
-                    .orElseThrow(() ->
-                            new RuntimeException("PLATINUM tier not found"));
+        MembershipTier selectedTier = null;
+
+        for (MembershipTier tier : tiers) {
+
+            if (user.getTotalOrders()
+                    >= tier.getMinimumOrders()
+                    &&
+                    user.getMonthlyOrderValue()
+                            >= tier.getMinimumOrderValue()) {
+
+                selectedTier = tier;
+            }
         }
 
-        if (
-                user.getTotalOrders() >= 20
-                        || user.getMonthlyOrderValue() >= 5000
-                        || "PREMIUM".equalsIgnoreCase(user.getCohort())
-        ) {
-
-            return tierRepository.findById(2L)
-                    .orElseThrow(() ->
-                            new RuntimeException("GOLD tier not found"));
-        }
-
-        return tierRepository.findById(1L)
-                .orElseThrow(() ->
-                        new RuntimeException("SILVER tier not found"));
+        return selectedTier;
     }
 }

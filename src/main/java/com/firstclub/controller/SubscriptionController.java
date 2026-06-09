@@ -7,6 +7,8 @@ import com.firstclub.service.SubscriptionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import com.firstclub.dto.MembershipResponse;
+
 @RestController
 @RequestMapping("/api/subscriptions")
 @RequiredArgsConstructor
@@ -49,9 +51,11 @@ public class SubscriptionController {
     }
 
     @GetMapping("/{subscriptionId}")
-    public Subscription getSubscription(
+    public MembershipResponse getSubscription(
             @PathVariable Long subscriptionId) {
 
-        return subscriptionService.getSubscription(subscriptionId);
+        return subscriptionService.convertToResponse(
+            subscriptionService.getSubscription(subscriptionId)
+        );
     }
 }

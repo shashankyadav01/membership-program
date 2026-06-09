@@ -1,11 +1,15 @@
 com\firstclub\entity\User$UserBuilder.class
+com\firstclub\entity\TierHistory$TierHistoryBuilder.class
 com\firstclub\service\TierService.class
 com\firstclub\dto\MembershipResponse.class
+com\firstclub\repository\TierHistoryRepository.class
 com\firstclub\entity\Order$OrderBuilder.class
+com\firstclub\entity\TierHistory.class
 com\firstclub\repository\MembershipTierRepository.class
 com\firstclub\service\MembershipService.class
 com\firstclub\dto\MembershipResponse$MembershipResponseBuilder.class
 com\firstclub\entity\Order.class
+com\firstclub\service\OrderService.class
 com\firstclub\MembershipApplication.class
 com\firstclub\repository\OrderRepository.class
 com\firstclub\entity\Subscription$SubscriptionBuilder.class
@@ -14,6 +18,7 @@ com\firstclub\entity\MembershipTier$MembershipTierBuilder.class
 com\firstclub\entity\MembershipTier.class
 com\firstclub\entity\Subscription.class
 com\firstclub\controller\SubscriptionController.class
+com\firstclub\exception\GlobalExceptionHandler.class
 com\firstclub\repository\MembershipPlanRepository.class
 com\firstclub\repository\UserRepository.class
 com\firstclub\repository\SubscriptionRepository.class

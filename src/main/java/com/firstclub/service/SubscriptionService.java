@@ -1,18 +1,15 @@
 package com.firstclub.service;
 
+import com.firstclub.dto.MembershipResponse;
 import com.firstclub.dto.SubscribeRequest;
-import com.firstclub.entity.MembershipPlan;
-import com.firstclub.entity.MembershipTier;
-import com.firstclub.entity.Subscription;
-import com.firstclub.entity.User;
-import com.firstclub.repository.MembershipPlanRepository;
-import com.firstclub.repository.MembershipTierRepository;
-import com.firstclub.repository.SubscriptionRepository;
-import com.firstclub.repository.UserRepository;
+import com.firstclub.entity.*;
+import com.firstclub.repository.*;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -23,11 +20,14 @@ public class SubscriptionService {
     private final MembershipPlanRepository membershipPlanRepository;
     private final MembershipTierRepository membershipTierRepository;
     private final TierService tierService;
+    private final TierHistoryRepository tierHistoryRepository;
 
     public Subscription subscribe(SubscribeRequest request) {
 
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user =
+                userRepository.findById(request.getUserId())
+                        .orElseThrow(() ->
+                                new RuntimeException("User not found"));
 
         subscriptionRepository
                 .findByUserIdAndStatus(user.getId(), "ACTIVE")
@@ -37,7 +37,8 @@ public class SubscriptionService {
                 });
 
         MembershipPlan plan =
-                membershipPlanRepository.findById(request.getPlanId())
+                membershipPlanRepository.findById(
+                                request.getPlanId())
                         .orElseThrow(() ->
                                 new RuntimeException("Plan not found"));
 
@@ -47,7 +48,8 @@ public class SubscriptionService {
         LocalDate startDate = LocalDate.now();
 
         LocalDate expiryDate =
-                startDate.plusMonths(plan.getDurationMonths());
+                startDate.plusMonths(
+                        plan.getDurationMonths());
 
         Subscription subscription =
                 Subscription.builder()
@@ -76,6 +78,19 @@ public class SubscriptionService {
                         .orElseThrow(() ->
                                 new RuntimeException("Tier not found"));
 
+        TierHistory history =
+                TierHistory.builder()
+                        .user(subscription.getUser())
+                        .oldTier(
+                                subscription.getTier().getTierName())
+                        .newTier(
+                                tier.getTierName())
+                        .changedAt(
+                                LocalDateTime.now())
+                        .build();
+
+        tierHistoryRepository.save(history);
+
         subscription.setTier(tier);
 
         return subscriptionRepository.save(subscription);
@@ -94,6 +109,19 @@ public class SubscriptionService {
                 membershipTierRepository.findById(tierId)
                         .orElseThrow(() ->
                                 new RuntimeException("Tier not found"));
+
+        TierHistory history =
+                TierHistory.builder()
+                        .user(subscription.getUser())
+                        .oldTier(
+                                subscription.getTier().getTierName())
+                        .newTier(
+                                tier.getTierName())
+                        .changedAt(
+                                LocalDateTime.now())
+                        .build();
+
+        tierHistoryRepository.save(history);
 
         subscription.setTier(tier);
 
@@ -119,5 +147,27 @@ public class SubscriptionService {
         return subscriptionRepository.findById(subscriptionId)
                 .orElseThrow(() ->
                         new RuntimeException("Subscription not found"));
+    }
+
+    public MembershipResponse convertToResponse(
+            Subscription subscription) {
+
+        return MembershipResponse.builder()
+                .subscriptionId(
+                        subscription.getId())
+                .userName(
+                        subscription.getUser().getName())
+                .planName(
+                        subscription.getMembershipPlan()
+                                .getPlanName())
+                .tierName(
+                        subscription.getTier()
+                                .getTierName())
+                .status(
+                        subscription.getStatus())
+                .expiryDate(
+                        subscription.getExpiryDate()
+                                .toString())
+                .build();
     }
 }
